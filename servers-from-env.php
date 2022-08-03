@@ -53,8 +53,7 @@ foreach ($_SERVER as $key => $value) {
 }
 
 echo PHP_EOL.PHP_EOL.'Using the following linked server instances:'.PHP_EOL;
-print_r($servers);
-
+print_r(array_map(fn($elem) => array_filter($elem,fn($var) => in_array($var, array('name', 'username', 'location')), ARRAY_FILTER_USE_KEY), $servers));
 
 // check if there are any servers
 if (!$servers) {
