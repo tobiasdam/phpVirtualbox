@@ -9,8 +9,8 @@ $config_overrides = array();
 foreach ($_SERVER as $key => $value) {
     preg_match('/(.*?)(?:_ENV_|_)?CONF_(.+)/', $key, $matches);
     if ($matches) {
-        $value= (strpos($value, ',')) ? explode(',',$value) : $value;
-        array_key_exists($matches[1], $config_overrides)?:$config_overrides[$matches[1]] = array();
+        $value = (strpos($value, ',')) ? explode(',', $value) : $value;
+        array_key_exists($matches[1], $config_overrides) ?: $config_overrides[$matches[1]] = array();
         $config_overrides[$matches[1]] += array($matches[2] => $value);
     }
 }
@@ -37,23 +37,26 @@ foreach ($_SERVER as $key => $value) {
 
         $location = 'http://' . str_replace('tcp://', '', $value) . '/';
 
-        $username = getenv($prefix.'_USER');
-        $password = getenv($prefix.'_PW');
+        $username = getenv($prefix . '_USER');
+        $password = getenv($prefix . '_PW');
 
         if ($username == "") $username = 'username';
         if ($password == "") $password = 'password';
 
-        $servers []= array_merge(array(
-            'name' => $name,
-            'username' => $username,
-            'password' => $password,
-            'location' => $location),
-            (array_key_exists($prefix, $config_overrides)) ? $config_overrides[$prefix] : array());
+        $servers[] = array_merge(
+            array(
+                'name' => $name,
+                'username' => $username,
+                'password' => $password,
+                'location' => $location
+            ),
+            (array_key_exists($prefix, $config_overrides)) ? $config_overrides[$prefix] : array()
+        );
     }
 }
 
-echo PHP_EOL.PHP_EOL.'Using the following linked server instances:'.PHP_EOL;
-print_r(array_map(fn($elem) => array_filter($elem,fn($var) => in_array($var, array('name', 'username', 'location')), ARRAY_FILTER_USE_KEY), $servers));
+echo PHP_EOL . PHP_EOL . 'Using the following linked server instances:' . PHP_EOL;
+print_r(array_map(fn ($elem) => array_filter($elem, fn ($var) => in_array($var, array('name', 'username', 'location')), ARRAY_FILTER_USE_KEY), $servers));
 
 // check if there are any servers
 if (!$servers) {
@@ -67,5 +70,5 @@ file_put_contents('/var/www/config-servers.php', '<?php return ' . var_export($s
 
 // put global config overrides into another file, which is then used in config.php of phpvirtualbox
 if (array_key_exists("", $config_overrides)) {
-    file_put_contents('/var/www/config-override.php','<?php return ' . var_export($config_overrides[""], true) . ';' );
+    file_put_contents('/var/www/config-override.php', '<?php return ' . var_export($config_overrides[""], true) . ';');
 }
